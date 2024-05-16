@@ -1,0 +1,25 @@
+/node_modules
+/public/hot
+/public/storage
+/public/storage
+/storage/*.key
+/vendor
+/bootstrap/cache
+.env
+.env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.idea
+laradock
+laradock
+stripe.exe
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+laradock

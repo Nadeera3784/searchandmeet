@@ -1,0 +1,88 @@
+FROM php:7.4-fpm
+
+USER root
+
+WORKDIR /var/www
+
+# Install dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends procps build-essential openssl nginx libfreetype6-dev libjpeg-dev libpng-dev libwebp-dev zlib1g-dev libzip-dev gcc g++ make vim unzip curl git locales libonig-dev supervisor nano cron \
+    && docker-php-ext-configure gd  \
+    && docker-php-ext-install gd \
+    && docker-php-ext-configure opcache --enable-opcache \
+    && docker-php-ext-install opcache \
+    && apt-get install -y --no-install-recommends libgmp-dev \
+    && docker-php-ext-install gmp \
+    && docker-php-ext-install pdo_mysql mbstring bcmath pcntl \
+    && docker-php-ext-install pdo \
+    && docker-php-ext-install zip \
+    && apt-get autoclean -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/pear/ \
+    && curl -sL https://deb.nodesource.com/setup_14.x | bash \
+    && apt-get install nodejs \
+    && node -v \
+    && npm -v
+
+# Install redis
+RUN pecl install -o -f redis \
+&&  rm -rf /tmp/pear \
+&&  docker-php-ext-enable redis
+
+# Copy files
+COPY . /var/www
+
+COPY ./deploy/core/php/php.ini /usr/local/etc/php/php.ini
+
+COPY ./deploy/core/php/php-pool /usr/local/etc/php-fpm.d
+
+COPY ./deploy/core/php/conf /usr/local/etc/php/conf.d
+
+RUN mkdir -p /var/run/php-fpm && chmod 775 /var/run/php-fpm && chown -R www-data:www-data /var/run/php-fpm
+
+RUN mkdir -p /var/www/bootstrap/cache
+
+COPY ./core.env /var/www/.env
+
+COPY ./deploy/core/supervisor /etc/supervisor
+
+COPY ./deploy/core/cron /etc/cron.d
+
+# Set permissions
+RUN chmod -R 0644 /etc/cron.d
+
+RUN chown -R www-data:www-data /var/www
+
+RUN chgrp -R www-data /var/www
+
+# Apply cron jobs
+RUN crontab /etc/cron.d/tab.txt
+
+# Setup composer and laravel
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN composer install --working-dir="/var/www" --ignore-platform-reqs --verbose
+
+RUN composer dump-autoload -o --working-dir="/var/www" --ignore-platform-reqs
+
+RUN php artisan config:clear
+
+RUN php artisan config:cache
+
+RUN php artisan event:cache
+
+RUN chown -R www-data:www-data /var/www/storage
+
+RUN chmod -R 775 /var/www/storage
+
+# RUN php artisan migrate --force
+
+# Link logs to std socket
+RUN mkdir -p /var/log/php && touch /var/log/php/error.log \
+&& ln -sf /dev/stderr /var/log/php/error.log \
+&& mkdir -p /var/log/php-fpm && touch /var/log/php-fpm/error.log \
+&& ln -sf /dev/stderr /var/log/php-fpm/error.log
+
+EXPOSE 8080
+
+ENTRYPOINT ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]

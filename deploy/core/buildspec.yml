@@ -1,0 +1,38 @@
+version: 0.2
+env:
+  parameter-store:
+    DOCKER_USERNAME: "DOCKER_USERNAME"
+    DOCKER_PASSWORD: "DOCKER_PASSWORD"
+phases:
+    install: 
+        runtime-versions:
+            php: 7.4
+    pre_build:
+        commands:
+            - echo logging in to Amazon ECR
+            - aws --version
+            # login to Elastic container registry
+            - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 00000.dkr.ecr.us-east-1.amazonaws.com
+            - REPOSITORY_URI=0000.dkr.ecr.us-east-1.amazonaws.com/sm-core
+            - IMAGE_TAG=latest
+            # Always make sure container name = ecs container; failed multiple times previously
+            - CONTAINER_NAME=sm-core-container
+    build:
+        commands:
+            - docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
+            - docker build -t $REPOSITORY_URI:latest -f deploy/core/dockerfile .
+            - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+            - echo Writing image definitions file..
+            - printf '[{"name":"CONTAINER_NAME","imageUri":"IMAGE_URI"}]' > imagedefinitions.json
+            - sed -i -e "s|CONTAINER_NAME|$CONTAINER_NAME|g" imagedefinitions.json
+            - sed -i -e "s|IMAGE_URI|$REPOSITORY_URI:$IMAGE_TAG|g" imagedefinitions.json
+            - cat imagedefinitions.json
+    post_build:
+        commands:
+            - echo Build completed on `date`
+            - echo Pushing the Docker image...
+            - docker image ls -a
+            - docker push $REPOSITORY_URI:$IMAGE_TAG
+artifacts:
+    files:
+        - imagedefinitions.json

@@ -1,0 +1,62 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "watch-poll": "mix watch -- --watch-options-poll=1000",
+        "hot": "mix watch --hot",
+        "prod": "npm run production",
+        "production": "mix --production"
+    },
+    "devDependencies": {
+        "@popperjs/core": "^2.9.2",
+        "autoprefixer": "^10.2.5",
+        "axios": "^0.21.2",
+        "bootstrap": "^4.6.0",
+        "browser-sync": "^2.26.14",
+        "browser-sync-webpack-plugin": "^2.3.0",
+        "daterangepicker": "^3.1.0",
+        "jquery": "^3.6.0",
+        "laravel-mix": "^6.0.25",
+        "lodash": "^4.17.19",
+        "moment": "^2.29.1",
+        "postcss": "^8.2.14",
+        "slick-carousel": "^1.8.1",
+        "tailwindcss": "^2.1.2"
+    },
+    "dependencies": {
+        "@babel/plugin-proposal-class-properties": "^7.2.3",
+        "@babel/preset-env": "^7.2.3",
+        "@babel/preset-react": "^7.13.13",
+        "@fullcalendar/core": "^5.7.2",
+        "@fullcalendar/daygrid": "^5.7.2",
+        "@fullcalendar/interaction": "^5.7.2",
+        "@fullcalendar/list": "^5.7.2",
+        "@fullcalendar/timegrid": "^5.7.2",
+        "@tailwindcss/forms": "^0.3.2",
+        "@tailwindcss/line-clamp": "^0.2.1",
+        "@yaireo/tagify": "^4.1.3",
+        "agora-rtm-sdk": "^1.4.3",
+        "alpinejs": "^2.8.2",
+        "aos": "^3.0.0-beta.6",
+        "glightbox": "^3.0.9",
+        "lottie-web": "^5.7.11",
+        "moment-timezone": "^0.5.33",
+        "qrcode": "^1.4.4",
+        "query-string": "^7.0.0",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-hot-toast": "^2.0.0",
+        "react-select": "^4.3.1"
+    },
+    "babel": {
+        "presets": [
+            "@babel/preset-env",
+            "@babel/preset-react"
+        ],
+        "plugins": [
+            "@babel/plugin-proposal-class-properties"
+        ]
+    }
+}
